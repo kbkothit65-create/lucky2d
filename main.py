@@ -1301,5 +1301,5 @@ def main(page: ft.Page):
         page.views.append(show_login_signup_view())
         page.update()
 
-if name == "main":
+if __name__ == "__main__":
     ft.app(target=main, view=ft.AppView.WEB_BROWSER, assets_dir="assets")
