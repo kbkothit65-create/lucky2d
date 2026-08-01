@@ -1300,3 +1300,5 @@ def main(page: ft.Page):
     else:
         page.views.append(show_login_signup_view())
         page.update()
+
+ft.app(target=main, assets_dir="assets")
