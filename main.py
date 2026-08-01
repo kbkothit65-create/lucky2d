@@ -1302,4 +1302,4 @@ def main(page: ft.Page):
         page.update()
 
 if __name__ == "__main__":
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER, assets_dir="assets")
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8501, assets_dir="assets")
