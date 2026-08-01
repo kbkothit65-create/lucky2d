@@ -1303,5 +1303,5 @@ def main(page: ft.Page):
 
 import os
 
-if name == "main":
+if __name__ == "__main__":
     ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=int(os.environ.get("PORT", 8080)), assets_dir="assets")
