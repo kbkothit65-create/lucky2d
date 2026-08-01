@@ -1301,4 +1301,4 @@ def main(page: ft.Page):
         page.views.append(show_login_signup_view())
         page.update()
 
-ft.Web(target=main, assets_dir="assets")
+ft.window(target=main, assets_dir="assets")
