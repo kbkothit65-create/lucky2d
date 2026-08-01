@@ -1301,5 +1301,4 @@ def main(page: ft.Page):
         page.views.append(show_login_signup_view())
         page.update()
 
-if name == "main":
     ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8501, assets_dir="assets")
