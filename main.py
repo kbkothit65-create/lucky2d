@@ -1,9 +1,13 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+import pytz
 import flet as ft
 from datetime import datetime, timedelta
 from supabase import create_client, Client
+
+yangon_tz = pytz.timezone('Asia/Yangon')
+now = datetime.now(yangon_tz)
 # ----------------------------------------------------
 # 🔗 SUPABASE CONNECTION SETTINGS
 # ----------------------------------------------------
