@@ -812,7 +812,7 @@ def main(page: ft.Page):
     # 🎯 2D PAGE UI BUILDER
     # ----------------------------------------------------
     def get_2d_page():
-        now = datetime.now()
+        now = datetime.now(yangon_tz)
         current_time_val = now.time()
 
         t_12pm = datetime.strptime("12:00:00", "%H:%M:%S").time()
