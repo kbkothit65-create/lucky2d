@@ -1020,7 +1020,7 @@ def main(page: ft.Page):
             target_session = session_radio.value
 
             # 💡 အချက် (၁) - အချိန်ကန့်သတ်ချက် စစ်ဆေးခြင်း
-            current_dt = datetime.now()
+            current_dt = datetime.now(yangon_tz)
             # ယနေ့ရက်စွဲနှင့် ရွေးချယ်ထားသော ပွဲချိန်ကို စစ်ဆေးခြင်း
             if target_date == current_dt.date():
                 t_now = current_dt.time()
