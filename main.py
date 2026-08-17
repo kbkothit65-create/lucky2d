@@ -527,7 +527,7 @@ def main(page: ft.Page):
                 if is_settled:
                     num_list = [n.strip() for n in item["numbers"].split(",")]
                     if win_num and win_num in num_list:
-                        won_amt = item["unit_price"] * 80
+                        won_amt = item["unit_price"] * 90
                         status_text = f"🎉 ပေါက်ပါသည် (+{won_amt:,} Ks)"
                         status_color = ft.Colors.GREEN_400
                     else:
