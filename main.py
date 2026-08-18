@@ -214,7 +214,7 @@ def main(page: ft.Page):
                     unit_price = bet["unit_price"]
 
                     if w_num in numbers_list:
-                        won_amount = unit_price * 80
+                        won_amount = unit_price * 90
                         u_res = supabase.table("users").select("balance").eq("id", u_id).execute()
                         if u_res.data:
                             cur_bal = u_res.data[0]["balance"]
