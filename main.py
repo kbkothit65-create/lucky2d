@@ -46,7 +46,7 @@ def main(page: ft.Page):
     # ----------------------------------------------------
     def get_user_balance():
 
-        phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
+        phone = user_phone_text.value if user_phone_text and user_phone_text.value else page.client_storage.get("saved_phone")
 
         if not phone :
             return 0
@@ -63,7 +63,7 @@ def main(page: ft.Page):
     user_phone_text = ft.Text("", size=10, color=ft.Colors.GREY_400)
 
     def refresh_wallet_ui(e=None):
-        phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
+        phone = user_phone_text.value if user_phone_text and user_phone_text.value else page.client_storage.get("saved_phone")
         if not phone :
             print("Error: No phone number found to refresh.")
             return
