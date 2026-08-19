@@ -33,50 +33,6 @@ def main(page: ft.Page):
     page.padding = 15
     page.theme_mode = ft.ThemeMode.DARK
 
-
-    saved_phone = page.client_storage.get("saved_phone")
-    saved_name = page.client_storage.get("saved_name")
-
-    global user_phone_text,user_name_text,wallet_text
-    user_phone_text=ft.Text(saved_phone if saved_phone else "")
-    user_name_text=ft.Text(saved_name if saved_name else "")
-    wallet_text=ft.Text("0 ks")
-    
-    def refresh_wallet_ui(e=None):
-        phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
-        if not phone :
-            print("Error: No phone number found to refresh.")
-            return
-        try:
-            res = supabase.table("users").select("name, balance, id").eq("id",phone).execute()
-            if res.data:
-                data = res.data[0]
-            wallet_text.value = f"{bal:,} Ks"
-            user_name_text.value = data['name']
-            user_phone_text.value = data['id']
-
-            current_user["name"] = data['name']
-            current_user["phone"] = data['id']
-            
-            page.update()
-            if e:
-                page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
-        except Exception as ex:
-            print("Refresh Error:", ex)
-    
-    if saved_phone:
-        current_user["phone"] = saved_phone
-        current_user["name"] = saved_name
-
-        page.views.clear()
-        page.views.append(get_main_home_view())
-        refresh_wallet_ui()
-    else:
-        page.views.clear()
-        page.views.append(show_login_signup_view())
-
-    page.update()
-
     selected_numbers = []
 
     def go_back(e=None):
@@ -104,6 +60,28 @@ def main(page: ft.Page):
     wallet_text = ft.Text("0 Ks", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_400)
     user_name_text = ft.Text("", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
     user_phone_text = ft.Text("", size=10, color=ft.Colors.GREY_400)
+
+    def refresh_wallet_ui(e=None):
+        phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
+        if not phone :
+            print("Error: No phone number found to refresh.")
+            return
+        try:
+            res = supabase.table("users").select("name, balance, id").eq("id",phone).execute()
+            if res.data:
+                data = res.data[0]
+            wallet_text.value = f"{bal:,} Ks"
+            user_name_text.value = data['name']
+            user_phone_text.value = data['id']
+
+            current_user["name"] = data['name']
+            current_user["phone"] = data['id']
+            
+            page.update()
+            if e:
+                page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
+        except Exception as ex:
+            print("Refresh Error:", ex)
 
     # ----------------------------------------------------
     # 🔑 AUTHENTICATION VIEW
@@ -1328,6 +1306,11 @@ def main(page: ft.Page):
     # ----------------------------------------------------
     saved_phone = page.client_storage.get("saved_phone")
     saved_name = page.client_storage.get("saved_name")
+
+    global user_phone_text,user_name_text,wallet_text
+    user_phone_text=ft.Text(saved_phone if saved_phone else "")
+    user_name_text=ft.Text(saved_name if saved_name else "")
+    wallet_text=ft.Text("0 ks")
 
     page.views.clear()
     
