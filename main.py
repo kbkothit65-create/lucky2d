@@ -44,10 +44,13 @@ def main(page: ft.Page):
     # 💰 FETCH USER BALANCE
     # ----------------------------------------------------
     def get_user_balance():
-        if not current_user["phone"]:
+
+        phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
+
+        if not phone :
             return 0
         try:
-            res = supabase.table("users").select("balance").eq("id", current_user["phone"]).execute()
+            res = supabase.table("users").select("balance").eq("id",phone).execute()
             if res.data:
                 return res.data[0]["balance"]
         except Exception as ex:
@@ -59,13 +62,21 @@ def main(page: ft.Page):
     user_phone_text = ft.Text("", size=10, color=ft.Colors.GREY_400)
 
     def refresh_wallet_ui(e=None):
-        bal = get_user_balance()
-        wallet_text.value = f"{bal:,} Ks"
-        user_name_text.value = current_user["name"]
-        user_phone_text.value = current_user["phone"]
-        page.update()
-        if e:
-            page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
+        phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
+        if not phone :
+            return
+        try:
+            res = supabase.table("users").select("name, balance, id").eq("id",phone).execute()
+            if res.data:
+                data = res.data[0]
+            wallet_text.value = f"{bal:,} Ks"
+            user_name_text.value = data['name']
+            user_phone_text.value = data['id']
+            page.update()
+            if e:
+                page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
+        except Exception as ex:
+            print("Refresh Error:", ex)
 
     # ----------------------------------------------------
     # 🔑 AUTHENTICATION VIEW
