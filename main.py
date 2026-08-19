@@ -988,7 +988,7 @@ def main(page: ft.Page):
             formatted_date = target_date.strftime("%d.%m.%Y")
 
             try:
-                supabase.table("users").update({"balance": new_bal}).in_("id", current_user["phone"], current_user["name"]).execute()
+                supabase.table("users").update({"balance": new_bal}).filter("id", current_user["phone"], current_user["name"]).execute()
 
                 supabase.table("bets").insert({
                     "user_id": current_user["phone"],
