@@ -1002,15 +1002,16 @@ def main(page: ft.Page):
         def process_final_bet(unit_price, total_cost, target_session, confirm_dialog):
             page.close(confirm_dialog)
 
+            active_user_phone = page.client_storage.get("saved_phone")
             curr_bal = get_user_balance()
             new_bal = curr_bal - total_cost
             formatted_date = target_date.strftime("%d.%m.%Y")
 
             try:
-                supabase.table("users").update({"balance": new_bal}).eq("id", current_user["phone"]).execute()
+                supabase.table("users").update({"balance": new_bal}).eq("id", active_user_phone).execute()
 
                 supabase.table("bets").insert({
-                    "user_id": current_user["phone"],
+                    "user_id": active_user_phone,
                     "bet_date": formatted_date,
                     "session": target_session,
                     "numbers": ', '.join(sorted(selected_numbers)),
