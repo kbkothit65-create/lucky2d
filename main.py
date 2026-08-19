@@ -691,6 +691,7 @@ def main(page: ft.Page):
 
                 supabase.table("transactions").insert({
                     "user_id": current_user["phone"],
+                    "name": current_user["name"],
                     "type": "withdraw",
                     "amount": w_amt,
                     "pay_type": pay_type.value,
@@ -710,7 +711,7 @@ def main(page: ft.Page):
         def show_history(e):
             history_list = ft.ListView(expand=True, spacing=10, height=350)
             try:
-                res = supabase.table("transactions").select("*").eq("user_id", current_user["phone"]).order("id", desc=True).execute()
+                res = supabase.table("transactions").select("*").eq("user_id", current_user["phone"]).eq("name", current_user["name"]).order("id", desc=True).execute()
                 tx_history = res.data if res.data else []
             except Exception as ex:
                 tx_history = []
