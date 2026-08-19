@@ -58,16 +58,6 @@ def main(page: ft.Page):
     user_name_text = ft.Text("", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
     user_phone_text = ft.Text("", size=10, color=ft.Colors.GREY_400)
 
-    
-    def refresh_wallet_ui(e=None):
-        bal = get_user_balance()
-        wallet_text.value = f"{bal:,} Ks"
-        user_name_text.value = current_user["name"]
-        user_phone_text.value = current_user["phone"]
-        page.update()
-        if e:
-            page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
-    
     # ----------------------------------------------------
     # 🔑 AUTHENTICATION VIEW
     # ----------------------------------------------------
@@ -1029,14 +1019,14 @@ def main(page: ft.Page):
             if target_date == current_dt.date():
                 t_now = current_dt.time()
                 if target_session == "12:01 PM":
-                    limit_time_12 = datetime.strptime("11:50:00", "%H:%M:%S").time()
+                    limit_time_12 = datetime.strptime("11:55:00", "%H:%M:%S").time()
                     if t_now >= limit_time_12:
-                        page.open(ft.SnackBar(ft.Text("🛑 ထိုးချိန်မမှီတော့ပါ (မနက် ၁၁:၅၀ ကျော်သွားပါပြီ)"), bgcolor=ft.Colors.RED_800))
+                        page.open(ft.SnackBar(ft.Text("🛑 ထိုးချိန်မမှီတော့ပါ (မနက် ၁၁:၅၅ ကျော်သွားပါပြီ)"), bgcolor=ft.Colors.RED_800))
                         return
                 elif target_session == "04:30 PM":
-                    limit_time_4 = datetime.strptime("15:50:00", "%H:%M:%S").time()
+                    limit_time_4 = datetime.strptime("16:00:00", "%H:%M:%S").time()
                     if t_now >= limit_time_4:
-                        page.open(ft.SnackBar(ft.Text("🛑 ထိုးချိန်မမှီတော့ပါ (ညနေ ၃:၅၀ ကျော်သွားပါပြီ)"), bgcolor=ft.Colors.RED_800))
+                        page.open(ft.SnackBar(ft.Text("🛑 ထိုးချိန်မမှီတော့ပါ (ညနေ ၄:၀၀ ကျော်သွားပါပြီ)"), bgcolor=ft.Colors.RED_800))
                         return
 
             if not selected_numbers:
@@ -1247,11 +1237,6 @@ def main(page: ft.Page):
                     automatically_imply_leading=False,
                     actions=[
                         ft.IconButton(
-                            icon=ft.Icons.REFRESH,
-                            tooltip="Refresh Balance",
-                            on_click=refresh_wallet_ui
-                        ),
-                        ft.IconButton(
                             icon=ft.Icons.ADMIN_PANEL_SETTINGS, 
                             tooltip="Admin Management Panel",
                             on_click=verify_admin_pin
@@ -1301,13 +1286,6 @@ def main(page: ft.Page):
         page.views.append(get_main_home_view())
         page.update()
         
-        try:
-            refresh_wallet_ui()
-        except:
-            pass
-    else:
-        page.views.append(show_login_signup_view())
-        page.update()
 
 import os
 
