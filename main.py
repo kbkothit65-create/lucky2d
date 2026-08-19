@@ -1174,7 +1174,7 @@ def main(page: ft.Page):
 
         banner_image = ft.Container(
             content=ft.Image(
-                src="icon.png",
+                src="iconp.png",
                 width=200,
                 height=200,
                 fit=ft.ImageFit.COVER,
