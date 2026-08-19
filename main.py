@@ -142,8 +142,7 @@ def main(page: ft.Page):
                         return
                     
                     supabase.table("users").insert({"id": phone, "name": name, "balance": 0}).execute()
-                    current_user["phone"] = phone
-                    current_user["name"] = name
+                    
                 else:
                     res = supabase.table("users").select("*").eq("id", phone).execute()
                     if not res.data:
@@ -155,14 +154,11 @@ def main(page: ft.Page):
                         page.open(ft.SnackBar(ft.Text("🛑 ဖုန်းနံပါတ် သို့မဟုတ် အမည် (Name) မှားယွင်းနေပါသည်။"), bgcolor=ft.Colors.RED_800))
                         return
 
-                    current_user["phone"] = phone
-                    current_user["name"] = db_user["name"]
+                page.client_storage.set("saved_phone", phone)
+                page.client_storage.set("saved_name", db_user["name"])
 
-                    user_phone_text.value = current_user["phone"]
-                    user_name_text.value = current_user["name"]
-
-                page.client_storage.set("saved_phone", current_user["phone"])
-                page.client_storage.set("saved_name", current_user["name"])
+                user_phone_text.value = phone
+                user_name_text.value = db_user["name"]
 
                 refresh_wallet_ui()
                 page.views.clear()
@@ -523,7 +519,7 @@ def main(page: ft.Page):
         history_list = ft.ListView(expand=True, spacing=10)
 
         try:
-            res = supabase.table("bets").select("*").eq("user_id", current_user["phone"]).order("id", desc=True).execute()
+            res = supabase.table("bets").select("*").eq("user_id", page.client_storage.get("saved_phone")).order("id", desc=True).execute()
             bet_history = res.data if res.data else []
         except Exception as ex:
             bet_history = []
@@ -666,7 +662,8 @@ def main(page: ft.Page):
 
             try:
                 supabase.table("transactions").insert({
-                    "user_id": current_user["phone"],
+                    "user_id": page.client_storage.get("saved_phone"),
+                    "name" : page.client_storage.get("saved_name"),
                     "type": "deposit",
                     "amount": d_amt,
                     "pay_type": pay_type.value,
@@ -703,13 +700,14 @@ def main(page: ft.Page):
 
             try:
                 new_bal = curr_bal - w_amt
-                supabase.table("users").update({"balance": new_bal}).eq("id", current_user["phone"]).execute()
+                supabase.table("users").update({"balance": new_bal}).eq("id", page.client_storage.get("saved_phone")).execute()
 
                 # Ref တွင် အမည်နှင့် ဖုန်းနံပါတ်ကို ပူးတွဲသိမ်းဆည်းပေးခြင်း
                 combined_ref = f"{acc_name} - {acc}"
 
                 supabase.table("transactions").insert({
-                    "user_id": current_user["phone"],
+                    "user_id": page.client_storage.get("saved_phone"),
+                    "name" : page.client_storage.get("saved_name"),
                     "type": "withdraw",
                     "amount": w_amt,
                     "pay_type": pay_type.value,
@@ -729,7 +727,7 @@ def main(page: ft.Page):
         def show_history(e):
             history_list = ft.ListView(expand=True, spacing=10, height=350)
             try:
-                res = supabase.table("transactions").select("*").eq("user_id", current_user["phone"]).order("id", desc=True).execute()
+                res = supabase.table("transactions").select("*").eq("user_id", page.client_storage.get("saved_phone")).order("id", desc=True).execute()
                 tx_history = res.data if res.data else []
             except Exception as ex:
                 tx_history = []
