@@ -71,7 +71,7 @@ def main(page: ft.Page):
             res = supabase.table("users").select("name, balance, id").eq("id",phone).execute()
             if res.data:
                 data = res.data[0]
-            wallet_text.value = f"{bal:,} Ks"
+            wallet_text.value = f"{data['balance']:,} Ks"
             user_name_text.value = data['name']
             user_phone_text.value = data['id']
 
