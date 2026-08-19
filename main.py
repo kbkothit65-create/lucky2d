@@ -32,7 +32,12 @@ def main(page: ft.Page):
     page.window.resizable = False
     page.padding = 15
     page.theme_mode = ft.ThemeMode.DARK
-    
+
+    global user_phone_text,user_name_text,wallet_text
+
+    user_phone_text=ft.Text("")
+    user_name_text=ft.Text("")
+    wallet_text=ft.Text("0 ks")
     # App စဖွင့်လိုက်တာနဲ့ storage ထဲမှာ သိမ်းထားတဲ့ အချက်အလက်ကို ပြန်ဆွဲထုတ်မယ်
     saved_phone = page.client_storage.get("saved_phone")
     saved_name = page.client_storage.get("saved_name")
