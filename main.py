@@ -64,6 +64,7 @@ def main(page: ft.Page):
     def refresh_wallet_ui(e=None):
         phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
         if not phone :
+            print("Error: No phone number found to refresh.")
             return
         try:
             res = supabase.table("users").select("name, balance, id").eq("id",phone).execute()
@@ -72,6 +73,10 @@ def main(page: ft.Page):
             wallet_text.value = f"{bal:,} Ks"
             user_name_text.value = data['name']
             user_phone_text.value = data['id']
+
+            current_user["name"] = data['name']
+            current_user["phone"] = data['id']
+            
             page.update()
             if e:
                 page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
