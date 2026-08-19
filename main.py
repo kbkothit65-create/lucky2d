@@ -143,6 +143,17 @@ def main(page: ft.Page):
                     
                     supabase.table("users").insert({"id": phone, "name": name, "balance": 0}).execute()
 
+                    page.client_storage.set("saved_phone", phone)
+                    page.client_storage.set("saved_name", name)
+
+                    user_phone_text.value = phone
+                    user_name_text.value = name
+
+                    refresh_wallet_ui()
+                    page.views.clear()
+                    page.views.append(get_main_home_view())
+                    page.update()
+
                 else:
                     res = supabase.table("users").select("*").eq("id", phone).execute()
                     if not res.data:
@@ -154,16 +165,16 @@ def main(page: ft.Page):
                         page.open(ft.SnackBar(ft.Text("🛑 ဖုန်းနံပါတ် သို့မဟုတ် အမည် (Name) မှားယွင်းနေပါသည်။"), bgcolor=ft.Colors.RED_800))
                         return
 
-                page.client_storage.set("saved_phone", phone)
-                page.client_storage.set("saved_name", db_user["name"])
+                    page.client_storage.set("saved_phone", phone)
+                    page.client_storage.set("saved_name", db_user["name"])
 
-                user_phone_text.value = phone
-                user_name_text.value = db_user["name"]
+                    user_phone_text.value = phone
+                    user_name_text.value = db_user["name"]
 
-                refresh_wallet_ui()
-                page.views.clear()
-                page.views.append(get_main_home_view())
-                page.update()
+                    refresh_wallet_ui()
+                    page.views.clear()
+                    page.views.append(get_main_home_view())
+                    page.update()
 
             except Exception as ex:
                 page.open(ft.SnackBar(ft.Text(f"Connection Error: {ex}"), bgcolor=ft.Colors.RED_800))
