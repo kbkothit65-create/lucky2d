@@ -988,10 +988,11 @@ def main(page: ft.Page):
             formatted_date = target_date.strftime("%d.%m.%Y")
 
             try:
-                supabase.table("users").update({"balance": new_bal}).eq("id", current_user["phone"], current_user["name"]).execute()
+                supabase.table("users").update({"balance": new_bal}).in_("id", current_user["phone"], current_user["name"]).execute()
 
                 supabase.table("bets").insert({
                     "user_id": current_user["phone"],
+                    "name": current_user["name"],
                     "bet_date": formatted_date,
                     "session": target_session,
                     "numbers": ', '.join(sorted(selected_numbers)),
