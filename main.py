@@ -33,6 +33,23 @@ def main(page: ft.Page):
     page.padding = 15
     page.theme_mode = ft.ThemeMode.DARK
 
+    global user_phone_text,user_name_text,wallet_text
+
+    user_phone_text=ft.Text("")
+    user_name_text=ft.Text("")
+    wallet_text=ft.Text("0 ks")
+    # App စဖွင့်လိုက်တာနဲ့ storage ထဲမှာ သိမ်းထားတဲ့ အချက်အလက်ကို ပြန်ဆွဲထုတ်မယ်
+    saved_phone = page.client_storage.get("saved_phone")
+    saved_name = page.client_storage.get("saved_name")
+    
+    if saved_phone:
+        current_user["phone"] = saved_phone
+        current_user["name"] = saved_name
+        
+        # UI ကို ပြန်တင်ပေးမယ်
+        user_phone_text.value = saved_phone
+        user_name_text.value = saved_name
+
     def refresh_wallet_ui(e=None):
         phone = user_phone_text.value if user_phone_text and user_phone_text.value else current_user.get("phone")
         if not phone :
@@ -54,25 +71,8 @@ def main(page: ft.Page):
                 page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
         except Exception as ex:
             print("Refresh Error:", ex)
-
-    global user_phone_text,user_name_text,wallet_text
-
-    user_phone_text=ft.Text("")
-    user_name_text=ft.Text("")
-    wallet_text=ft.Text("0 ks")
-    # App စဖွင့်လိုက်တာနဲ့ storage ထဲမှာ သိမ်းထားတဲ့ အချက်အလက်ကို ပြန်ဆွဲထုတ်မယ်
-    saved_phone = page.client_storage.get("saved_phone")
-    saved_name = page.client_storage.get("saved_name")
-    
+        
     if saved_phone:
-        current_user["phone"] = saved_phone
-        current_user["name"] = saved_name
-        
-        # UI ကို ပြန်တင်ပေးမယ်
-        user_phone_text.value = saved_phone
-        user_name_text.value = saved_name
-        
-        # အရေးကြီး: Refresh လုပ်လိုက်တာနဲ့ အချက်အလက် အကုန်ပြန်ပေါ်အောင် ခေါ်မယ်
         refresh_wallet_ui()
 
     selected_numbers = []
