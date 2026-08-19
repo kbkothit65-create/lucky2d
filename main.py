@@ -19,6 +19,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # 🔐 ADMIN ONLY PASSCODE
 ADMIN_PIN = "103006"
 
+global user_phone_text,user_name_text,wallet_text
 # Global Current User Session
 current_user = {
     "phone": "",
@@ -1307,7 +1308,6 @@ def main(page: ft.Page):
     saved_phone = page.client_storage.get("saved_phone")
     saved_name = page.client_storage.get("saved_name")
 
-    global user_phone_text,user_name_text,wallet_text
     user_phone_text=ft.Text(saved_phone if saved_phone else "")
     user_name_text=ft.Text(saved_name if saved_name else "")
     wallet_text=ft.Text("0 ks")
