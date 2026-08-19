@@ -61,23 +61,24 @@ def main(page: ft.Page):
     
     def refresh_wallet_ui(e=None):
     # current_user ကို အလွတ်မသုံးတော့ဘဲ UI ပေါ်က text ထဲမှာ ရှိတဲ့ ဖုန်းနံပါတ်ကို အရင်ယူမယ်
-        current_phone = user_phone_text.value
-    
-        if not current_phone:
-            return
+        current_phone = current_user["phone"]
 
     # အဲ့ဒီဖုန်းနံပါတ်နဲ့ပဲ balance သွားဆွဲမယ်
         try:
-            res = supabase.table("users").select("balance").eq("id", current_phone).execute()
+            res = supabase.table("users").select("name, balance, id").eq("id", current_phone).execute()
             if res.data:
-                bal = res.data[0]["balance"]
-                wallet_text.value = f"{bal:,} Ks"
+                data = res.data[0]
+                # UI ပေါ်မှာ အကုန်ပြန်ပြမယ်
+                wallet_text.value = f"{data['balance']:,} Ks"
+                user_name_text.value = data['name']
+                user_phone_text.value = data['id']
                 page.update()
+            
                 if e:
                     page.open(ft.SnackBar(ft.Text("✅ လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ"), bgcolor=ft.Colors.BLUE_800))
         except Exception as ex:
             print("Refresh Error:", ex)
-
+    
     # ----------------------------------------------------
     # 🔑 AUTHENTICATION VIEW
     # ----------------------------------------------------
