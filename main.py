@@ -157,6 +157,9 @@ def main(page: ft.Page):
                     current_user["phone"] = phone
                     current_user["name"] = db_user["name"]
 
+                    user_phone_text.value = current_user["phone"]
+                    user_name_text.value = current_user["name"]
+
                 page.client_storage.set("saved_phone", current_user["phone"])
                 page.client_storage.set("saved_name", current_user["name"])
 
