@@ -58,14 +58,25 @@ def main(page: ft.Page):
     user_name_text = ft.Text("", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
     user_phone_text = ft.Text("", size=10, color=ft.Colors.GREY_400)
 
+    
     def refresh_wallet_ui(e=None):
-        bal = get_user_balance()
-        wallet_text.value = f"{bal:,} Ks"
-        user_name_text.value = current_user["name"]
-        user_phone_text.value = current_user["phone"]
-        page.update()
-        if e:
-            page.open(ft.SnackBar(ft.Text("🔄 လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ။"), bgcolor=ft.Colors.BLUE_800))
+    # current_user ကို အလွတ်မသုံးတော့ဘဲ UI ပေါ်က text ထဲမှာ ရှိတဲ့ ဖုန်းနံပါတ်ကို အရင်ယူမယ်
+    current_phone = user_phone_text.value
+    
+    if not current_phone:
+        return
+
+    # အဲ့ဒီဖုန်းနံပါတ်နဲ့ပဲ balance သွားဆွဲမယ်
+    try:
+        res = supabase.table("users").select("balance").eq("id", current_phone).execute()
+        if res.data:
+            bal = res.data[0]["balance"]
+            wallet_text.value = f"{bal:,} Ks"
+            page.update()
+            if e:
+                page.open(ft.SnackBar(ft.Text("✅ လက်ကျန်ငွေ အသစ်ဖြစ်သွားပါပြီ"), bgcolor=ft.Colors.BLUE_800))
+    except Exception as ex:
+        print("Refresh Error:", ex)
 
     # ----------------------------------------------------
     # 🔑 AUTHENTICATION VIEW
