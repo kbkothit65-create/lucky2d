@@ -647,6 +647,7 @@ def main(page: ft.Page):
             try:
                 supabase.table("transactions").insert({
                     "user_id": current_user["phone"],
+                    "name": current_user["name"],
                     "type": "deposit",
                     "amount": d_amt,
                     "pay_type": pay_type.value,
