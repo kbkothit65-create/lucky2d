@@ -3,8 +3,70 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import pytz
 import flet as ft
+import requests
+import json
 from datetime import datetime, timedelta
 from supabase import create_client, Client
+
+# Telegram ထဲသို့ စာနှင့် ပုံ ပို့ပေးမည့် Function
+def send_deposit_to_telegram(phone, amount, trx_id, deposit_id, Paytp):
+    BOT_TOKEN = "8680151013:AAGCgLOOKzLTm3X4PiJa8TaUVR3NUEd-S6s"
+    CHAT_ID = "-1004379940626"
+    
+    text_msg = (
+        f"📩 ( ငွေသွင်းတောင်းဆိုမှု 🟢 )\n\n"
+        f"⚠️ Req ID - `{deposit_id}`\n"
+        f"👤 User - `{phone}`\n"
+        f"💰 ပမာဏ - {amount:,} MMK\n\n"
+        f"🏧 Pay Type - `{Paytp}`\n"
+        f"🆔 Trx ID - `{trx_id}`\n"
+    )
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "✅ Approve", "callback_data": f"approve_{deposit_id}"},
+                {"text": "❌ Reject", "callback_data": f"reject_{deposit_id}"}
+            ]
+        ]
+    }
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id={CHAT_ID}&text={text_msg}"
+    payload = {
+        "chat_id":CHAT_ID,
+        "text": text_msg,
+        "parse_mode": "Markdown",
+        "reply_markup": json.dumps(keyboard)
+    }
+    requests.get(url, json=payload)
+
+def send_withdraw_to_telegram(phone, amount, trx_id, withdraw_id, Paytp):
+    BOT_TOKEN = "8680151013:AAGCgLOOKzLTm3X4PiJa8TaUVR3NUEd-S6s"
+    CHAT_ID = "-1004379940626"
+    
+    withdraw_text_msg = (
+        f"📩 ( ငွေထုတ်တောင်းဆိုမှု 🔴 )\n\n"
+        f"⚠️ Req ID - `{withdraw_id}`\n"
+        f"👤 User Phone - `{phone}`\n"
+        f"💰 ပမာဏ - {amount:,} MMK\n\n"
+        f"🏧 Pay Type - `{Paytp}`\n"
+        f"🆔 Trx ID - `{trx_id}`\n"
+    )
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "✅ Approve", "callback_data": f"approve_{withdraw_id}"},
+                {"text": "❌ Reject", "callback_data": f"reject_{withdraw_id}"}
+            ]
+        ]
+    }
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id={CHAT_ID}&text={withdraw_text_msg}"
+    payload = {
+        "chat_id":CHAT_ID,
+        "text": withdraw_text_msg,
+        "parse_mode": "Markdown",
+        "reply_markup": json.dumps(keyboard)
+    }
+    requests.get(url, json=payload)
 
 yangon_tz = pytz.timezone('Asia/Yangon')
 now = datetime.now(yangon_tz)
@@ -672,7 +734,7 @@ def main(page: ft.Page):
                 return
 
             try:
-                supabase.table("transactions").insert({
+                res = supabase.table("transactions").insert({
                     "user_id": page.client_storage.get("saved_phone"),
                     "name" : page.client_storage.get("saved_name"),
                     "type": "deposit",
@@ -681,6 +743,18 @@ def main(page: ft.Page):
                     "trans_id_or_acc": tid,
                     "status": "Pending"
                 }).execute()
+
+                deposit_id = res.data[0]["id"] if res and res.data else "N/A"
+        
+                    # Telegram သို့ အကြောင်းကြားစာ ပို့မည်
+                send_deposit_to_telegram(
+                    phone=page.client_storage.get("saved_phone"),
+                    amount=d_amt,
+                    trx_id=tid,
+                    deposit_id=deposit_id,
+                    Paytp=pay_type.value
+                )
+                print("--- ငွေသွင်းလွှာတင်ပြီးပါပြီ ---")
 
                 page.open(ft.SnackBar(ft.Text("✅ ငွေသွင်းတောင်းဆိုချက် ပေးပို့ပြီးပါပြီ။"), bgcolor=ft.Colors.GREEN_800))
                 deposit_amt.value = ""
@@ -716,7 +790,7 @@ def main(page: ft.Page):
                 # Ref တွင် အမည်နှင့် ဖုန်းနံပါတ်ကို ပူးတွဲသိမ်းဆည်းပေးခြင်း
                 combined_ref = f"{acc_name} - {acc}"
 
-                supabase.table("transactions").insert({
+                res = supabase.table("transactions").insert({
                     "user_id": page.client_storage.get("saved_phone"),
                     "name" : page.client_storage.get("saved_name"),
                     "type": "withdraw",
@@ -725,6 +799,18 @@ def main(page: ft.Page):
                     "trans_id_or_acc": combined_ref,
                     "status": "Pending"
                 }).execute()
+
+                withdraw_id = res.data[0]["id"] if res and res.data else "N/A"
+        
+                    # Telegram သို့ အကြောင်းကြားစာ ပို့မည်
+                send_withdraw_to_telegram(
+                    phone=page.client_storage.get("saved_phone"),
+                    amount=w_amt,
+                    trx_id=combined_ref,
+                    withdraw_id=withdraw_id,
+                    Paytp=pay_type.value
+                )
+                print("--- ငွေထုတ်လွှာတင်ပြီးပါပြီ ---")
 
                 refresh_wallet_ui()
                 page.open(ft.SnackBar(ft.Text("✅ ငွေထုတ်တောင်းဆိုချက် ပေးပို့ပြီးပါပြီ။"), bgcolor=ft.Colors.GREEN_800))
@@ -1254,16 +1340,6 @@ def main(page: ft.Page):
             on_click=lambda _: (page.views.append(get_wallet_page()), page.update())
         )
 
-        btn_help = ft.ElevatedButton(
-            content=ft.Row([
-                ft.Icon(ft.Icons.SUPPORT_AGENT, size=28),
-                ft.Text("အကူအညီရယူရန်", size=16, weight=ft.FontWeight.BOLD),
-            ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
-            style=ft.ButtonStyle(bgcolor=ft.Colors.INDIGO_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
-            width=280, height=55,
-            on_click=open_help_dialog
-        )
-
         return ft.View(
             route="/home",
             controls=[
@@ -1276,6 +1352,11 @@ def main(page: ft.Page):
                             icon=ft.Icons.REFRESH,
                             tooltip="Refresh Balance",
                             on_click=refresh_wallet_ui
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.SUPPORT_AGENT,
+                            tooltip="Help",
+                            on_click=open_help_dialog
                         ),
                         ft.IconButton(
                             icon=ft.Icons.ADMIN_PANEL_SETTINGS, 
@@ -1298,7 +1379,7 @@ def main(page: ft.Page):
                 ft.Column([
                     header_section,
                     ft.Container(
-                        content=ft.Column([banner_image, btn_2d, btn_history, btn_results, btn_wallet, btn_help], 
+                        content=ft.Column([banner_image, btn_2d, btn_history, btn_results, btn_wallet], 
                         spacing=15, 
                         alignment=ft.MainAxisAlignment.CENTER
                         ),
