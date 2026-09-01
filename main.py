@@ -733,6 +733,19 @@ def main(page: ft.Page):
                 page.open(ft.SnackBar(ft.Text("🛑 ပမာဏ မှားယွင်းနေပါသည်။"), bgcolor=ft.Colors.RED_800))
                 return
 
+            # ယူဆာ ရိုက်ထည့်လိုက်သော ကုဒ် ၆ လုံး (Transaction ID)
+            tx_code = trans_id.value.strip()
+
+            # ၁။ Supabase ထဲတွင် ဒီ ၆ လုံး ကုဒ် ဖြင့် transaction ရှိပြီးသားလား စစ်မည်
+            check_exist = supabase.table("transactions").select("id").eq("trans_id_or_acc", tx_code).execute()
+
+            # ၂။ ရှိပြီးသား ဖြစ်နေပါက အောက်သို့ ဆက်မသွားဘဲ ရပ်လိုက်မည် (Request ထပ်လုပ်မရတော့ပါ)
+            if check_exist.data:
+                # App UI မှာ သတိပေးစာ ပြပေးရန်
+                page.open(ft.SnackBar(ft.Text("❌ ဒီ Transaction Code ၆ လုံးကို အသုံးပြုပြီးသား သို့မဟုတ် စစ်ဆေးဆဲ ဖြစ်နေပါသည်။"), bgcolor=ft.Colors.RED_800))
+                page.update()
+                return  # အောက်က insert logic ထံ ဆက်မသွားအောင် တားလိုက်ခြင်း
+
             try:
                 res = supabase.table("transactions").insert({
                     "user_id": page.client_storage.get("saved_phone"),
