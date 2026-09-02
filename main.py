@@ -1617,7 +1617,8 @@ def main(page: ft.Page):
                         content=ft.Column([banner_image,btn_slot, btn_2d, btn_history, btn_results, btn_wallet], 
                         spacing=15, 
                         alignment=ft.MainAxisAlignment.CENTER,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        scroll=ft.ScrollMode.AUTO
                         ),
                         expand=True,
                         alignment=ft.alignment.center
