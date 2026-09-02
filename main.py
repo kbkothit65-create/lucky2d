@@ -4,9 +4,27 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 import pytz
 import flet as ft
 import requests
+import random
+import time
 import json
 from datetime import datetime, timedelta
 from supabase import create_client, Client
+
+def prevent_double_click(action_func):
+    """ခလုတ်ကို ၁ ချက်ထက်ပိုပြီး ဆက်တိုက် နှိပ်မရအောင် ကာကွယ်ပေးသော Function"""
+    def wrapper(e):
+        # နှိပ်လိုက်တာနဲ့ ခလုတ်ကို ချက်ချင်း Disabled ပိတ်မည်
+        e.control.disabled = True
+        e.control.page.update()
+        
+        try:
+            action_func(e)
+        finally:
+            # Logic ပြီးသွားပါက ခလုတ်ကို ပြန်ဖွင့်ပေးမည်
+            e.control.disabled = False
+            e.control.page.update()
+            
+    return wrapper
 
 # Telegram ထဲသို့ စာနှင့် ပုံ ပို့ပေးမည့် Function
 def send_deposit_to_telegram(phone, amount, trx_id, deposit_id, Paytp):
@@ -887,12 +905,12 @@ def main(page: ft.Page):
                 bgcolor=ft.Colors.WHITE10, padding=10, border_radius=8, width=300
             ),
             pay_type, deposit_amt, trans_id,
-            ft.ElevatedButton("ငွေသွင်းလွှာ တင်မည်", bgcolor=ft.Colors.GREEN_600, color=ft.Colors.WHITE, on_click=submit_deposit)
+            ft.ElevatedButton("ငွေသွင်းလွှာ တင်မည်", bgcolor=ft.Colors.GREEN_600, color=ft.Colors.WHITE, on_click=prevent_double_click(submit_deposit))
         ], spacing=12, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
 
         withdraw_view = ft.Column([
             pay_type, withdraw_amt, withdraw_name_input, withdraw_acc,
-            ft.ElevatedButton("ငွေထုတ်ရန် တောင်းဆိုမည်", bgcolor=ft.Colors.RED_600, color=ft.Colors.WHITE, on_click=submit_withdraw)
+            ft.ElevatedButton("ငွေထုတ်ရန် တောင်းဆိုမည်", bgcolor=ft.Colors.RED_600, color=ft.Colors.WHITE, on_click=prevent_double_click(submit_withdraw))
         ], spacing=12, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
 
         main_container = ft.Container(content=deposit_view, padding=10, alignment=ft.alignment.top_center)
@@ -1200,7 +1218,9 @@ def main(page: ft.Page):
                         "သေချာပြီ", 
                         bgcolor=ft.Colors.GREEN_600, 
                         color=ft.Colors.WHITE,
-                        on_click=lambda _: process_final_bet(unit_price, total_cost, target_session, confirm_dialog)
+                        on_click=prevent_double_click(
+                            lambda _: process_final_bet(unit_price, total_cost, target_session, confirm_dialog)
+                        )
                     ),
                 ]
             )
@@ -1276,6 +1296,198 @@ def main(page: ft.Page):
         )
         page.open(help_dialog)
 
+    def card_flip_page():
+    # ==========================================
+    # Game Config & States
+    # ==========================================
+        ENTRY_FEE = 1000
+        PRIZES = {"🎁": 1000, "🏆": 2000, "💵": 3000, "💰": 5000, "💎": 10000, "🔴": 0}
+    
+    # Session / State Variables
+        flipped_cards = []  # ရွေးချယ်ထားသော ကတ် Index များ
+        card_data = []      # Random ကျထားသော ကတ် values များ (ဥပမာ ['A', 'C', 'A', ...])
+        card_buttons = []   # UI Button Objects
+        is_playing = False
+
+        # Client Storage မှ User Data များယူခြင်း
+        user_name = page.client_storage.get("saved_name") or "Player"
+        user_phone = page.client_storage.get("saved_phone") or ""
+
+        # Current Balance ယူခြင်း
+        user_res = supabase.table("users").select("balance").eq("id", user_phone).execute()
+        current_balance = user_res.data[0]["balance"] if user_res.data else 0
+
+        # ==========================================
+        # UI Components (Header & Status)
+        # ==========================================
+        balance_text = ft.Text(f"{current_balance:,} Ks", size=16, weight=ft.FontWeight.BOLD, color="yellow")
+        status_text = ft.Text("ကတ်လှန်ရန် ၁၀၀၀ ကျပ်ဖြင့်စတင်ပါ", size=14, color="white", weight=ft.FontWeight.BOLD)
+
+        grid_container = ft.GridView(
+            expand=True,
+            runs_count=5,
+            max_extent=80,
+            child_aspect_ratio=0.9,
+            spacing=6,
+            run_spacing=6,
+        )
+
+        init_cards = ["💎"]*5 + ["💰"]*5 + ["💵"]*5 + ["🏆"]*5
+        # UI Grid Rebuild
+        grid_container.controls.clear()
+            
+        for val in init_cards:
+            btn = ft.Container(
+                content=ft.Text(val,size=20, color="black", weight=ft.FontWeight.BOLD),
+                alignment=ft.alignment.center,
+                bgcolor=ft.Colors.WHITE, border_radius=8
+            )
+            grid_container.controls.append(btn)
+
+        # ==========================================
+        # Logic Functions
+        # ==========================================
+        def update_balance_ui(new_balance):
+            nonlocal current_balance
+            current_balance = new_balance
+            balance_text.value = f"{current_balance:,} Ks"
+            page.update()
+
+        def auto_reveal_all():
+            """ဂိမ်းအနိုင်/အရှုံး ပေါ်ပါက ကျန်သော ကတ်များကို ပွင့်ပြပေးခြင်း"""
+            for idx, btn in enumerate(card_buttons):
+                val = card_data[idx]
+                btn.content = ft.Text(f"{val}", size=20, weight=ft.FontWeight.BOLD, color="black", text_align=ft.TextAlign.CENTER)
+                btn.bgcolor = ft.Colors.BLUE_GREY_100
+                btn.disabled = True
+            page.update()
+
+        def on_card_click(e, index):
+            nonlocal flipped_cards
+    
+            # နှိပ်ပြီးသား သို့မဟုတ် ၃ ကြိမ်ပြည့်နေပါက အလုပ်မလုပ်ပါ
+            if index in flipped_cards or len(flipped_cards) >= 3:
+                return
+            # ကတ်လှန်ခြင်း UI Update
+            val = card_data[index]
+            e.control.content = ft.Text(val, size=22, weight=ft.FontWeight.BOLD, color="black")
+            e.control.bgcolor = ft.Colors.WHITE
+            page.update()
+            flipped_cards.append(index)
+            # လှန်ထားသော ကတ်များထဲမှ Values များကို ယူခြင်း
+            opened_values = [card_data[i] for i in flipped_cards]
+            # ၁။ လှန်ထားသော ကတ်များထဲတွင် မည်သည့် ကတ် ၂ ခု မဆို တူသွားပါက (အနိုင်)
+            matched_val = None
+            for v in set(opened_values):
+                if v != "🔴" and opened_values.count(v) >= 2:
+                    matched_val = v
+                    break
+            if matched_val:
+                time.sleep(0.3)
+                win_amount = PRIZES[matched_val]
+                new_bal = current_balance + win_amount
+                # Supabase Balance & Transaction Update
+                supabase.table("users").update({"balance": new_bal}).eq("id", user_phone).execute()
+        
+                update_balance_ui(new_bal)
+                refresh_wallet_ui()
+                status_text.value = f"🎉 ဂုဏ်ယူပါသည်! {matched_val} တူညီ၍ {win_amount:,} ကျပ် နိုင်ပါသည်!"
+                status_text.color = "green"
+        
+                auto_reveal_all()
+                play_btn.disabled = False
+                page.update()
+                return
+            # ၂။ ၄ ကတ် လှန်ပြီးသော်လည်း တူသည့်ကတ် မရှိပါက (အရှုံး)
+            if len(flipped_cards) == 3:
+                time.sleep(0.3)
+                status_text.value = "❌ ၃ ကတ်လုံး မတူပါ! နောက်တစ်ကြိမ် ပြန်လည်ကြိုးစားပါ။"
+                status_text.color = "red"
+                auto_reveal_all()
+                play_btn.disabled = False
+                page.update()
+
+        def start_game(e):
+            nonlocal card_data, flipped_cards, is_playing
+
+            # Balance စစ်ခြင်း
+            if current_balance < ENTRY_FEE:
+                page.open(ft.SnackBar(ft.Text("❌ လက်ကျန်ငွေ မလုံလောက်ပါ!"), bgcolor=ft.Colors.RED_800))
+                return
+
+            # ၁,၀၀၀ ကျပ် နှုတ်ခြင်း
+            new_bal = current_balance - ENTRY_FEE
+            supabase.table("users").update({"balance": new_bal}).eq("id", user_phone).execute()
+            update_balance_ui(new_bal)
+            refresh_wallet_ui()
+
+            # ကတ် ၅ မျိုးကို ၃ စုံစီ Random မွှေခြင်း (စုစုပေါင်း ၁၅ ကတ်)
+            cards = ["🏆", "💵", "💰"] * 3 + ["🔴"] * 5 + ["💎"] * 2 + ["🎁"] * 4
+            random.shuffle(cards)
+            card_data = cards
+            flipped_cards = []
+
+            grid_container.controls.clear()
+            card_buttons.clear()
+
+            for i in range(20):
+                btn = ft.Container(
+                    content=ft.Icon(ft.Icons.QUESTION_MARK, color="white", size=18),
+                    alignment=ft.alignment.center,
+                    bgcolor=ft.Colors.BLUE_800, border_radius=8,
+                    on_click=lambda e, idx=i: on_card_click(e, idx)
+                )
+                card_buttons.append(btn)
+                grid_container.controls.append(btn)
+
+            play_btn.disabled = True
+            status_text.value = "ကတ် ၃ ခု ရွေးချယ်လှန်ပါ..."
+            status_text.color = "white"
+            page.update()
+
+    # ==    ========================================
+    # UI     Layout Construction
+    # ==========================================
+        play_btn = ft.ElevatedButton("ဆော့မည်", on_click=prevent_double_click(start_game), style=ft.ButtonStyle(bgcolor="orange", color="black"))
+
+        # Top Bar: Back Button, User Name, Balance
+        header = ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            controls=[
+                ft.IconButton(ft.Icons.ARROW_BACK, on_click=go_back),
+                ft.Text(user_name, size=16, weight=ft.FontWeight.BOLD),
+                balance_text
+            ]
+        )
+
+        # Prize Table (ဆုကြေးဇယား)
+        prize_info = ft.Column([
+            ft.Row([
+                ft.Container(content=ft.Text("🎁 = 1000", color="black", weight="bold"), bgcolor="white", padding=5, border_radius=5),
+                ft.Container(content=ft.Text("🏆 = 2000", color="black", weight="bold"), bgcolor="white", padding=5, border_radius=5),
+                ft.Container(content=ft.Text("💵 = 3000", color="black", weight="bold"), bgcolor="white", padding=5, border_radius=5),
+            ], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Row([
+                ft.Container(content=ft.Text("💰 = 5000", color="black", weight="bold"), bgcolor="white", padding=5, border_radius=5),
+                ft.Container(content=ft.Text("💎 = 10000", color="black", weight="bold"), bgcolor="white", padding=5, border_radius=5),
+                ft.Container(content=ft.Text("🔴 = XXXX", color="black", weight="bold"), bgcolor="white", padding=5, border_radius=5),
+            ], alignment=ft.MainAxisAlignment.CENTER),
+        ])
+
+        return ft.View(
+            "/card_flip",
+            controls=[
+                header,
+                ft.Divider(),
+                prize_info,
+                ft.Container(content=grid_container, height=340, padding=10),
+                ft.Container(height=10),
+                ft.Container(content=status_text,alignment=ft.alignment.center),
+                ft.Container(content=play_btn, alignment=ft.alignment.center)
+                
+            ]
+        )
+
     # ----------------------------------------------------
     # 🏠 MAIN HOME VIEW
     # ----------------------------------------------------
@@ -1311,6 +1523,16 @@ def main(page: ft.Page):
             alignment=ft.alignment.center,
             width=300,
             margin=ft.margin.only(bottom=15)
+        )
+
+        btn_slot = ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(ft.Icons.CASINO, size=28),
+                ft.Text("ကပ်လှန်ဂိမ်းဆော့မယ်", size=18, weight=ft.FontWeight.BOLD),
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
+            style=ft.ButtonStyle(bgcolor=ft.Colors.RED_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
+            width=280, height=55,
+            on_click=lambda _: (page.views.append(card_flip_page()), page.update())
         )
 
         btn_2d = ft.ElevatedButton(
@@ -1392,9 +1614,10 @@ def main(page: ft.Page):
                 ft.Column([
                     header_section,
                     ft.Container(
-                        content=ft.Column([banner_image, btn_2d, btn_history, btn_results, btn_wallet], 
+                        content=ft.Column([banner_image,btn_slot, btn_2d, btn_history, btn_results, btn_wallet], 
                         spacing=15, 
-                        alignment=ft.MainAxisAlignment.CENTER
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
                         ),
                         expand=True,
                         alignment=ft.alignment.center
