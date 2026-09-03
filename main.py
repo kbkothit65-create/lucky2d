@@ -1528,7 +1528,7 @@ def main(page: ft.Page):
         btn_slot = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.CASINO, size=28),
-                ft.Text("ကပ်လှန်ဂိမ်းဆော့မယ်", size=18, weight=ft.FontWeight.BOLD),
+                ft.Text("ကတ်လှန်ဂိမ်းဆော့မယ်", size=18, weight=ft.FontWeight.BOLD),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
             style=ft.ButtonStyle(bgcolor=ft.Colors.RED_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
             width=280, height=55,
