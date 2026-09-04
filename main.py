@@ -115,6 +115,46 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
 
     selected_numbers = []
+    # HTML/CSS ဖြင့် ပြုလုပ်ထားသော Smooth Marquee Component
+    marquee_container = ft.Container(
+        content=ft.WebView(
+            url="data:text/html;charset=utf-8," + """
+            <html>
+            <head>
+                <style>
+                    body {
+                        margin: 0;
+                        background-color: #111419 ;
+                        overflow: hidden;
+                        display: flex;
+                        align-items: center;
+                    }
+                    .marquee {
+                        white-space: nowrap;
+                        font-family: sans-serif;
+                        font-weight: bold;
+                        font-size: 12px;
+                        color: #FFC107;
+                        animation: marquee 20s linear infinite;
+                    }
+                    @keyframes marquee {
+                        0%   { transform: translateX(50%); }
+                        100% { transform: translateX(-100%); }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="marquee">
+                    📢 Lucky 2D မှ ကြိုဆိုပါသည်! 2D နှင့် ကဒ်လှန်ဂိမ်းများကို စိတ်ကြိုက် ကစားနိုင်ပါသည်။ ငွေသွင်း/ငွေထုတ် ၂၄ နာရီ ဝန်ဆောင်မှုရှိပါသည်။
+                </div>
+            </body>
+            </html>
+            """,
+            expand=True,
+        ),
+        height=35,
+        border_radius=8,
+    )
 
     def go_back(e=None):
         if len(page.views) > 1:
@@ -1522,7 +1562,7 @@ def main(page: ft.Page):
             ),
             alignment=ft.alignment.center,
             width=300,
-            margin=ft.margin.only(bottom=15)
+            margin=ft.margin.only(bottom=10)
         )
 
         btn_slot = ft.ElevatedButton(
@@ -1531,7 +1571,7 @@ def main(page: ft.Page):
                 ft.Text("ကတ်လှန်ဂိမ်းဆော့မယ်", size=18, weight=ft.FontWeight.BOLD),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
             style=ft.ButtonStyle(bgcolor=ft.Colors.RED_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
-            width=280, height=55,
+            width=280, height=50,
             on_click=lambda _: (page.views.append(card_flip_page()), page.update())
         )
 
@@ -1541,7 +1581,7 @@ def main(page: ft.Page):
                 ft.Text("2D ထိုးမည်", size=20, weight=ft.FontWeight.BOLD),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
             style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_600, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
-            width=280, height=55,
+            width=280, height=50,
             on_click=lambda _: (page.views.append(get_2d_page()), page.update())
         )
 
@@ -1551,7 +1591,7 @@ def main(page: ft.Page):
                 ft.Text("ထိုးထားသော စာရင်းများ", size=18, weight=ft.FontWeight.BOLD),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
             style=ft.ButtonStyle(bgcolor=ft.Colors.AMBER_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
-            width=280, height=55,
+            width=280, height=50,
             on_click=lambda _: (page.views.append(get_history_page()), page.update())
         )
 
@@ -1561,7 +1601,7 @@ def main(page: ft.Page):
                 ft.Text("2D ထွက်ဂဏန်းများကြည့်မည်", size=16, weight=ft.FontWeight.BOLD),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
             style=ft.ButtonStyle(bgcolor=ft.Colors.PURPLE_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
-            width=280, height=55,
+            width=280, height=50,
             on_click=lambda _: (page.views.append(get_results_page()), page.update())
         )
 
@@ -1571,7 +1611,7 @@ def main(page: ft.Page):
                 ft.Text("ငွေသွင်း - ငွေထုတ်", size=18, weight=ft.FontWeight.BOLD),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
             style=ft.ButtonStyle(bgcolor=ft.Colors.TEAL_700, color=ft.Colors.WHITE, shape=ft.RoundedRectangleBorder(radius=12)),
-            width=280, height=55,
+            width=280, height=50,
             on_click=lambda _: (page.views.append(get_wallet_page()), page.update())
         )
 
@@ -1613,9 +1653,10 @@ def main(page: ft.Page):
                 ),
                 ft.Column([
                     header_section,
+                    marquee_container,
                     ft.Container(
                         content=ft.Column([banner_image,btn_slot, btn_2d, btn_history, btn_results, btn_wallet], 
-                        spacing=15, 
+                        spacing=10, 
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         scroll=ft.ScrollMode.AUTO
