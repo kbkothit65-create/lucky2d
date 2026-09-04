@@ -135,10 +135,10 @@ def main(page: ft.Page):
                         font-weight: bold;
                         font-size: 12px;
                         color: #FFC107;
-                        animation: marquee 20s linear infinite;
+                        animation: marquee 10s linear infinite;
                     }
                     @keyframes marquee {
-                        0%   { transform: translateX(100%); }
+                        0%   { transform: translateX(150%); }
                         100% { transform: translateX(-100%); }
                     }
                 </style>
