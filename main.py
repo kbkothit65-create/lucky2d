@@ -145,7 +145,7 @@ def main(page: ft.Page):
             </head>
             <body>
                 <div class="marquee">
-                    📢 2D ပိတ်ရက်မှာ ကတ်လှန်ဂိမ်းဆော့ပြီး ဘောစိလုပ်လိုက်ပါ 😎
+                    📢 2D အဖွင့်နေ့မှာ Lucky 2D နဲ့ တူးဒီကစားလိုက်ပါ
                 </div>
             </body>
             </html>
