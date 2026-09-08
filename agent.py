@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 import flet as ft
 from supabase import create_client, Client
 
@@ -226,4 +229,7 @@ def main(page: ft.Page):
 
     load_login_page()
 
-ft.app(target=main, assets_dir="assets")
+import os
+
+if __name__ == "__main__":
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=int(os.environ.get("PORT", 8080)), assets_dir="assets")
