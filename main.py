@@ -133,9 +133,9 @@ def main(page: ft.Page):
                         white-space: nowrap;
                         font-family: sans-serif;
                         font-weight: bold;
-                        font-size: 12px;
+                        font-size: 13px;
                         color: #FFC107;
-                        animation: marquee 10s linear infinite;
+                        animation: marquee 12s linear infinite;
                     }
                     @keyframes marquee {
                         0%   { transform: translateX(150%); }
@@ -145,7 +145,7 @@ def main(page: ft.Page):
             </head>
             <body>
                 <div class="marquee">
-                    📢 2D အဖွင့်နေ့မှာ Lucky 2D နဲ့ တူးဒီကစားလိုက်ပါ
+                    📢 ဒီမနက် ၁၀၀၀၀ ဖိုးပေါက်ရင် ညနေ ဖုန်းအသစ်ဝယ်လိုက်🤭
                 </div>
             </body>
             </html>
