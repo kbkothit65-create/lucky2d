@@ -135,7 +135,7 @@ def main(page: ft.Page):
                         font-weight: bold;
                         font-size: 13px;
                         color: #FFC107;
-                        animation: marquee 12s linear infinite;
+                        animation: marquee 13s linear infinite;
                     }
                     @keyframes marquee {
                         0%   { transform: translateX(150%); }
@@ -145,7 +145,7 @@ def main(page: ft.Page):
             </head>
             <body>
                 <div class="marquee">
-                    📢 ဒီမနက် ၁၀၀၀၀ ဖိုးပေါက်ရင် ညနေ ဖုန်းအသစ်ဝယ်လိုက်🤭
+                    📢 အရင်ကထက် အပေးကြမ်းနေတဲ့ ကတ်လှန်ဂိမ်းဆော့ဖို့ မမေ့နဲ့နော်
                 </div>
             </body>
             </html>
@@ -1462,7 +1462,7 @@ def main(page: ft.Page):
             refresh_wallet_ui()
 
             # ကတ် ၅ မျိုးကို ၃ စုံစီ Random မွှေခြင်း (စုစုပေါင်း ၁၅ ကတ်)
-            cards = ["🏆", "💵", "💰"] * 3 + ["🔴"] * 5 + ["💎"] * 2 + ["🎁"] * 4
+            cards = ["💎"]*3 + ["💰"]*3 + ["💵"]*3 + ["🏆"]*4 + ["🎁"]*4 + ["🔴"]*3
             random.shuffle(cards)
             card_data = cards
             flipped_cards = []
