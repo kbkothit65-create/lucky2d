@@ -1462,7 +1462,7 @@ def main(page: ft.Page):
             refresh_wallet_ui()
 
             # ကတ် ၅ မျိုးကို ၃ စုံစီ Random မွှေခြင်း (စုစုပေါင်း ၁၅ ကတ်)
-            cards = ["💎"]*3 + ["💰"]*3 + ["💵"]*3 + ["🏆"]*4 + ["🎁"]*4 + ["🔴"]*3
+            cards = ["💎"]*2 + ["💰"]*3 + ["💵"]*3 + ["🏆"]*4 + ["🎁"]*4 + ["🔴"]*4
             random.shuffle(cards)
             card_data = cards
             flipped_cards = []
