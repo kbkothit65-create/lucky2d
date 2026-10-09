@@ -314,7 +314,7 @@ def main(page: ft.Page):
         except:
             pass
     else:
-        page.views.append(show_login_signup_view())
+        page.views.append(get_main_home_view())
         page.update()
 
 import os
